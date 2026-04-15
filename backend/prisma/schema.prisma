@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("USER")
+  avatar       String?
+  createdAt    DateTime @default(now())
+}
+
+model Device {
+  id         String     @id @default(uuid())
+  name       String
+  type       String
+  room       String     @default("Living Room")
+  status     String
+  parameters String
+  apiKey     String?    @unique @default(uuid())
+  lastSeen   DateTime   @default(now())
+
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  events     EventLog[]
+}
+
+model EventLog {
+  id          String   @id @default(uuid())
+  deviceId    String
+  eventType   String
+  description String
+  timestamp   DateTime @default(now())
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+}
+
+model Telemetry {
+  id        String   @id @default(uuid())
+  room      String   @default("House") // Specific room or "House" for globals
+  type      String   // 'POWER', 'TEMP', 'AQI', 'HUMIDITY'
+  value     Float
+  timestamp DateTime @default(now())
+}
+
